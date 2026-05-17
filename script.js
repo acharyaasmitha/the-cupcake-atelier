@@ -225,7 +225,7 @@ Total:
     // OPEN WHATSAPP
     window.open(
 
-`https://wa.me/919876543210?text=${encodeURIComponent(message)}`
+`https://wa.me/917845509979?text=${encodeURIComponent(message)}`
 
     );
 
