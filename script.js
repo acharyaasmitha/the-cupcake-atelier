@@ -128,7 +128,18 @@ function updateCart(){
     });
 
     totalDisplay.innerText = total;
+const cartCount =
+document.getElementById("cart-count");
 
+let count = 0;
+
+cart.forEach(item => {
+
+   count += item.quantity;
+
+});
+
+cartCount.innerText = count;
 }
 
 // INCREASE
