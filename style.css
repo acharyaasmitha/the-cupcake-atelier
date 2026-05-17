@@ -370,3 +370,56 @@
    font-size:16px;
 
 }
+.floating-cart{
+
+   position:fixed;
+
+   top:20px;
+   right:20px;
+
+   z-index:9999;
+
+   background:#C05A72;
+
+   color:white;
+
+   border:none;
+
+   padding:14px 20px;
+
+   border-radius:50px;
+
+   font-size:16px;
+
+   font-weight:bold;
+
+   cursor:pointer;
+
+   box-shadow:0 6px 20px rgba(0,0,0,0.2);
+
+   display:flex;
+   align-items:center;
+   gap:10px;
+
+}
+
+#cart-count{
+
+   background:white;
+
+   color:#C05A72;
+
+   width:24px;
+   height:24px;
+
+   border-radius:50%;
+
+   display:flex;
+   align-items:center;
+   justify-content:center;
+
+   font-size:13px;
+
+   font-weight:bold;
+
+}
