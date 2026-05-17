@@ -241,3 +241,14 @@ Total:
     );
 
 });
+function scrollToCart(){
+
+   document
+   .querySelector(".cart-section")
+   .scrollIntoView({
+
+      behavior:"smooth"
+
+   });
+
+}
