@@ -10,7 +10,7 @@
 
   gtag('config', 'G-TP3CWEX2JL');
 </script>
-  
+
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Cupcake Atelier – Menu</title>
@@ -101,7 +101,7 @@
       </div>
 
       <div class="float-field">
-        <input type="text" id="phone" placeholder=" " />
+        <input type="tel" inputmode="numeric" id="phone" placeholder=" " />
         <label for="phone">Phone Number</label>
       </div>
 
@@ -111,7 +111,7 @@
       </div>
 
       <div class="float-field">
-        <input type="text" id="pincode" placeholder=" " />
+        <input type="tel" inputmode="numeric" id="pincode" placeholder=" " />
         <label for="pincode">Pincode (Chennai only)</label>
       </div>
 
@@ -153,6 +153,13 @@
 
 <div class="page">
 
+  <!-- CATEGORY NAV -->
+  <nav class="cat-nav" id="cat-nav">
+    <button class="cat-pill active" onclick="scrollToSection('sec-cookies')">🍪 Cookies <span class="cat-count">7</span></button>
+    <button class="cat-pill" onclick="scrollToSection('sec-cheesecakes')">🫐 Cheesecakes <span class="cat-count">6</span></button>
+    <button class="cat-pill" onclick="scrollToSection('sec-cupcakes')">🧁 Cupcakes <span class="cat-count">5</span></button>
+  </nav>
+
   <!-- HEADER -->
   <header>
     <div class="orn">
@@ -179,7 +186,7 @@
   </div>
 
   <!-- COOKIES -->
-  <div class="sec reveal">
+  <div class="sec reveal" id="sec-cookies">
     <div class="sec-head">
       <span class="sec-ico">🍪</span>
       <span class="sec-ttl">Artisan Cookies</span>
@@ -286,7 +293,7 @@
   </div>
 
   <!-- MINI CHEESECAKES -->
-  <div class="sec reveal" style="animation-delay:1.0s;">
+  <div class="sec reveal" id="sec-cheesecakes">
     <div class="sec-head">
       <span class="sec-ico">🫐</span>
       <span class="sec-ttl">Mini Cheesecakes</span>
@@ -363,7 +370,7 @@
   </div>
 
   <!-- CUPCAKES -->
-  <div class="sec reveal" style="animation-delay:1.2s;">
+  <div class="sec reveal" id="sec-cupcakes">
     <div class="sec-head">
       <span class="sec-ico">🧁</span>
       <span class="sec-ttl">Signature Cupcakes</span>
@@ -461,3 +468,4 @@
 <script src="script.js"></script>
 </body>
 </html>
+
