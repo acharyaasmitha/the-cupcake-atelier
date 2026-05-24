@@ -1120,77 +1120,7 @@
     font-size: 9px;
   }
 }
-/* CATEGORY NAV */
-.cat-nav {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: nowrap;
-  padding: 16px 20px;
-  position: sticky;
-  top: 0;
-  z-index: 9990;
-  background: var(--cream);
-  transition: box-shadow 0.3s, top 0.35s;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.cat-nav::-webkit-scrollbar {
-  display: none;
-}
-.cat-nav.scrolled {
-  top: 57px;
-  box-shadow: 0 4px 16px rgba(192,90,114,.07);
-}
-.cat-pill {
-  background: var(--white);
-  border: 1.5px solid #f5d8df;
-  border-radius: 30px;
-  padding: 8px 16px;
-  font-family: 'Jost', sans-serif;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.cat-pill:hover {
-  border-color: var(--rose);
-  color: var(--deep-rose);
-  background: var(--petal);
-}
-.cat-pill.active {
-  background: linear-gradient(135deg, var(--deep-rose), #a0405a);
-  border-color: transparent;
-  color: white;
-  box-shadow: 0 4px 12px rgba(192,90,114,.25);
-}
-.cat-pill.active .cat-count {
-  background: rgba(255,255,255,.25);
-  color: white;
-}
-.cat-count {
-  background: var(--petal);
-  color: var(--deep-rose);
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 20px;
-  padding: 1px 7px;
-  transition: all 0.2s;
-}
 
-@media (max-width: 540px) {
-  .cat-nav {
-    justify-content: flex-start;
-    padding: 12px 16px;
-  }
-  .cat-pill { font-size: 12px; padding: 7px 12px; }
-}
 /* EMPTY CART SVG STATE */
 .cart-empty {
   display: flex;
