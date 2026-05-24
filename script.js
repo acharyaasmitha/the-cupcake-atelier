@@ -12,15 +12,14 @@ window.addEventListener("load", () => {
   if (saved.name)  document.getElementById("name").value  = saved.name;
   if (saved.phone) document.getElementById("phone").value = saved.phone;
 
-  // RESTORE SESSION FORM DATA
   const session = JSON.parse(sessionStorage.getItem("ca_form") || "{}");
   if (session.address) document.getElementById("address").value = session.address;
   if (session.pincode) document.getElementById("pincode").value = session.pincode;
   if (session.note)    document.getElementById("order-note").value = session.note;
 });
 
-// PERSIST FORM TO SESSIONSTORE ON INPUT
-["address","pincode","order-note"].forEach(id => {
+// PERSIST FORM TO SESSIONSTORAGE ON INPUT
+["address", "pincode", "order-note"].forEach(id => {
   document.getElementById(id).addEventListener("input", () => {
     const session = {
       address: document.getElementById("address").value,
@@ -58,7 +57,6 @@ buttons.forEach(button => {
     updateCart();
     flashButton(button);
     bounceCartBtn();
-    updateCatNav();
   });
 });
 
@@ -80,49 +78,22 @@ function bounceCartBtn() {
   btn.classList.add("bounce");
 }
 
-// STICKY HEADER + BACK TO TOP + CAT NAV ON SCROLL
+// STICKY HEADER + BACK TO TOP ON SCROLL
 window.addEventListener("scroll", () => {
   const sticky      = document.getElementById("sticky-header");
   const floatingBtn = document.getElementById("floating-cart-btn");
   const backToTop   = document.getElementById("back-to-top");
-  const catNav      = document.getElementById("cat-nav");
 
   if (window.scrollY > 120) {
     sticky.classList.add("visible");
     floatingBtn.classList.add("hide");
     backToTop.classList.add("visible");
-    catNav.classList.add("scrolled");
   } else {
     sticky.classList.remove("visible");
     floatingBtn.classList.remove("hide");
     backToTop.classList.remove("visible");
-    catNav.classList.remove("scrolled");
   }
-
-  // HIGHLIGHT ACTIVE CATEGORY
-  const sections = [
-    { id: "sec-cookies",     btn: 0 },
-    { id: "sec-cheesecakes", btn: 1 },
-    { id: "sec-cupcakes",    btn: 2 }
-  ];
-  let current = 0;
-  sections.forEach((s, i) => {
-    const el = document.getElementById(s.id);
-    if (el && window.scrollY >= el.offsetTop - 160) current = i;
-  });
-  document.querySelectorAll(".cat-pill").forEach((pill, i) => {
-    pill.classList.toggle("active", i === current);
-  });
 });
-
-// SCROLL TO SECTION
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const offset = 130;
-  const top = el.getBoundingClientRect().top + window.scrollY - offset;
-  window.scrollTo({ top, behavior: "smooth" });
-}
 
 // SYNC BOTH CART COUNTS
 function updateCartCounts(count) {
@@ -148,7 +119,7 @@ function scrollToCart() { openCart(); }
 
 // STEP SWITCHING
 function showStep(step) {
-  ["cart","summary","checkout","thankyou"].forEach(s => {
+  ["cart", "summary", "checkout", "thankyou"].forEach(s => {
     document.getElementById(`step-${s}`).classList.toggle("hidden", s !== step);
   });
 }
@@ -260,12 +231,6 @@ function removeItem(index) {
   updateCart();
 }
 
-// UPDATE CATEGORY NAV ACTIVE STATE
-function updateCatNav() {
-  // just re-trigger scroll check
-  window.dispatchEvent(new Event("scroll"));
-}
-
 // PLACE ORDER
 document.getElementById("place-order").addEventListener("click", () => {
   const name    = document.getElementById("name").value.trim();
@@ -318,7 +283,7 @@ Total: ₹${document.getElementById("total").innerText}${note ? `\n\nNote: ${not
   cart = [];
   updateCart();
   sessionStorage.removeItem("ca_form");
-  ["address","pincode","order-note"].forEach(id => {
+  ["address", "pincode", "order-note"].forEach(id => {
     document.getElementById(id).value = "";
   });
 
