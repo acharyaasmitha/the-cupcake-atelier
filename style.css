@@ -1114,3 +1114,9 @@
   .hero-icons { font-size: 22px; letter-spacing: 6px; }
   .back-to-top { bottom: 86px; }
 }
+@media (max-width: 540px) {
+  .sub {
+    letter-spacing: 3px;
+    font-size: 9px;
+  }
+}
