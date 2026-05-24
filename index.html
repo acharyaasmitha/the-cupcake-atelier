@@ -4,18 +4,143 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Cupcake Atelier – Menu</title>
+
+  <!-- OG META TAGS -->
+  <meta property="og:title"       content="The Cupcake Atelier – Handcrafted Home Bakery"/>
+  <meta property="og:description" content="Small batch, made to order — artisan cookies, mini cheesecakes, cupcakes & more. Chennai only 🍰"/>
+  <meta property="og:image"       content="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=1200&q=80"/>
+  <meta property="og:url"         content="https://thecupcakeatelier.vercel.app"/>
+  <meta property="og:type"        content="website"/>
+  <meta name="twitter:card"       content="summary_large_image"/>
+
   <link rel="stylesheet" href="style.css">
-  
 </head>
 <body>
-<body>
 
-<button class="floating-cart" onclick="scrollToCart()">
+<!-- STICKY HEADER -->
+<div class="sticky-header" id="sticky-header">
+  <span class="sticky-logo">The Cupcake Atelier</span>
+  <button class="floating-cart sticky-cart-btn" onclick="openCart()">
+    🛒 Cart
+    <span id="cart-count-sticky">0</span>
+  </button>
+</div>
 
-   🛒 Cart
-   <span id="cart-count">0</span>
-
+<!-- FLOATING CART -->
+<button class="floating-cart" id="floating-cart-btn" onclick="openCart()">
+  🛒 Cart
+  <span id="cart-count">0</span>
 </button>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  ↑
+</button>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cart-drawer">
+
+  <!-- STEP 1: CART -->
+  <div class="drawer-step" id="step-cart">
+    <div class="drawer-header">
+      <h2>Your Cart 🛒</h2>
+      <button class="drawer-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="drawer-body" id="cart-items"></div>
+    <div class="drawer-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span>₹<span id="total">0</span></span>
+      </div>
+      <button class="drawer-cta" id="go-summary">Review Order →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: ORDER SUMMARY -->
+  <div class="drawer-step hidden" id="step-summary">
+    <div class="drawer-header">
+      <button class="drawer-back" id="back-to-cart">← Back</button>
+      <h2>Your Order</h2>
+      <button class="drawer-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="drawer-body" id="summary-items"></div>
+    <div class="drawer-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span>₹<span id="total-summary">0</span></span>
+      </div>
+      <button class="drawer-cta" id="go-checkout">Proceed to Checkout →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: CHECKOUT -->
+  <div class="drawer-step hidden" id="step-checkout">
+    <div class="drawer-header">
+      <button class="drawer-back" id="go-back">← Back</button>
+      <h2>Checkout</h2>
+      <button class="drawer-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="float-field">
+        <input type="text" id="name" placeholder=" " />
+        <label for="name">Your Name</label>
+      </div>
+
+      <div class="float-field">
+        <input type="text" id="phone" placeholder=" " />
+        <label for="phone">Phone Number</label>
+      </div>
+
+      <div class="float-field">
+        <textarea id="address" placeholder=" "></textarea>
+        <label for="address">Delivery Address</label>
+      </div>
+
+      <div class="float-field">
+        <input type="text" id="pincode" placeholder=" " />
+        <label for="pincode">Pincode (Chennai only)</label>
+      </div>
+
+      <div class="float-field">
+        <textarea id="order-note" placeholder=" "></textarea>
+        <label for="order-note">Note for your order (optional)</label>
+      </div>
+
+      <div class="trust-note">🔒 Your info is only shared with us via WhatsApp</div>
+
+    </div>
+    <div class="drawer-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span>₹<span id="total2">0</span></span>
+      </div>
+      <button class="drawer-cta" id="place-order">Place Order via WhatsApp 💬</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: THANK YOU -->
+  <div class="drawer-step hidden" id="step-thankyou">
+    <div class="drawer-header">
+      <h2>Order Placed!</h2>
+      <button class="drawer-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="drawer-body thankyou-body">
+      <div class="thankyou-emoji">🎉</div>
+      <div class="thankyou-title">Thank you!</div>
+      <div class="thankyou-msg">
+        Your order has been sent to us on WhatsApp.<br>
+        We'll confirm your order and delivery timeline shortly. 🍰
+      </div>
+      <button class="drawer-cta" onclick="closeCart()">Back to Menu</button>
+    </div>
+  </div>
+
+</div>
+
 <div class="page">
 
   <!-- HEADER -->
@@ -33,8 +158,18 @@
     </div>
   </header>
 
+  <!-- HERO BANNER -->
+  <div class="hero-banner">
+    <div class="hero-text">
+      <span>Fresh.</span>
+      <span>Handcrafted.</span>
+      <span>Made for you.</span>
+    </div>
+    <div class="hero-icons">🍪 🧁 🫐 ☕ 🍫</div>
+  </div>
+
   <!-- COOKIES -->
-  <div class="sec">
+  <div class="sec reveal">
     <div class="sec-head">
       <span class="sec-ico">🍪</span>
       <span class="sec-ttl">Artisan Cookies</span>
@@ -43,101 +178,80 @@
     <p class="sec-note">Baked fresh per order · Available in sets of 3 &amp; 6</p>
     <div class="cookie-grid">
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info">
           <div class="name">Chocolate Chip</div>
           <div class="desc">Classic golden cookie loaded with chocolate chips</div>
         </div>
         <div class="action">
-            <div class="price">₹80</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹80</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info">
           <div class="name">Double Chocolate</div>
           <div class="desc">Deep chocolate cookie with melty chocolate chunks</div>
         </div>
         <div class="action">
-            <div class="price">₹80</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹80</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card star">
+      <div class="card star reveal">
         <div class="info">
           <div class="name">White Bueno Cookie <span class="badge">✦ bestseller</span></div>
           <div class="desc">Buttery cookie with White Kinder Bueno pieces throughout</div>
         </div>
         <div class="action">
-            <div class="price">₹90</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹90</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info">
           <div class="name">Nutella Cookie</div>
           <div class="desc">Rich cookie swirled with Nutella throughout</div>
         </div>
         <div class="action">
-            <div class="price">₹90</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹90</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info">
           <div class="name">S'mores Cookie</div>
           <div class="desc">Chocolate cookie with marshmallow and graham cracker</div>
         </div>
         <div class="action">
-            <div class="price">₹90</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹90</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card star">
+      <div class="card star reveal">
         <div class="info">
           <div class="name">Nutella Filled Cookie <span class="badge">✦ bestseller</span></div>
           <div class="desc">Golden cookie with a warm molten Nutella centre</div>
         </div>
         <div class="action">
-            <div class="price">₹90</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹90</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info">
           <div class="name">Raspberry Filled Cookie</div>
           <div class="desc">Buttery cookie with a jammy raspberry filling</div>
         </div>
         <div class="action">
-            <div class="price">₹90</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹90</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
@@ -145,41 +259,24 @@
   </div>
 
   <!-- SCOOPABLE COOKIE -->
-<div class="feature">
-
+  <div class="feature reveal">
     <div class="feature-emoji">🍫</div>
-
     <div class="feature-body">
-
-      <div class="feature-title">
-        Scoopable Nutella Cookie — Big Box
-      </div>
-
+      <div class="feature-title">Scoopable Nutella Cookie — Big Box</div>
       <div class="feature-desc">
         A generous tray of warm, gooey Nutella cookie dough — scoopable, shareable
         and absolutely impossible to resist. Perfect for sharing (or not).
       </div>
-
-      <span class="feature-tag">
-        ✦ bestseller
-      </span>
-
+      <span class="feature-tag">✦ bestseller</span>
     </div>
-
     <div class="action">
-
-       <div class="feature-price">₹600</div>
-
-       <button class="add-btn">
-          Add to Cart
-       </button>
-
+      <div class="feature-price">₹600</div>
+      <button class="add-btn">Add to Cart</button>
     </div>
-
-</div>
+  </div>
 
   <!-- MINI CHEESECAKES -->
-  <div class="sec" style="animation-delay:1.0s;">
+  <div class="sec reveal" style="animation-delay:1.0s;">
     <div class="sec-head">
       <span class="sec-ico">🫐</span>
       <span class="sec-ttl">Mini Cheesecakes</span>
@@ -188,69 +285,51 @@
     <p class="sec-note">Creamy &amp; indulgent · Available in sets of 4, 6 &amp; 9</p>
     <div class="cheese-grid">
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info"><div class="name">Nutella</div></div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info"><div class="name">Strawberry</div></div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info"><div class="name">Blueberry</div></div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info"><div class="name">Raspberry</div></div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info"><div class="name">Lime</div></div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="info"><div class="name">Bueno</div></div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
@@ -258,28 +337,23 @@
   </div>
 
   <!-- TIRAMISU -->
-<div class="feature" style="animation-delay:1.1s; margin-top:46px;">
+  <div class="feature reveal" style="margin-top:46px;">
     <div class="feature-emoji">☕</div>
-
     <div class="feature-body">
       <div class="feature-title">Tiramisu</div>
-
       <div class="feature-desc">
-        Classic Italian dessert with layers of espresso-soaked ladyfingers and silky mascarpone cream — rich, indulgent and utterly dreamy.
+        Classic Italian dessert with layers of espresso-soaked ladyfingers and silky
+        mascarpone cream — rich, indulgent and utterly dreamy.
       </div>
     </div>
-
     <div class="action">
-       <div class="feature-price">₹600</div>
-
-       <button class="add-btn">
-          Add to Cart
-       </button>
+      <div class="feature-price">₹600</div>
+      <button class="add-btn">Add to Cart</button>
     </div>
-</div>
+  </div>
 
   <!-- CUPCAKES -->
-  <div class="sec" style="animation-delay:1.2s;">
+  <div class="sec reveal" style="animation-delay:1.2s;">
     <div class="sec-head">
       <span class="sec-ico">🧁</span>
       <span class="sec-ttl">Signature Cupcakes</span>
@@ -288,78 +362,63 @@
     <p class="sec-note">Made fresh to order · Available individually or in boxes of 4, 6 &amp; 12</p>
     <div class="list">
 
-      <div class="card">
+      <div class="card reveal">
         <div class="dot"></div>
         <div class="info">
           <div class="name">Vanilla White Chocolate</div>
           <div class="desc">Fluffy vanilla cupcake with white chocolate ganache frosting</div>
         </div>
         <div class="action">
-            <div class="price">₹80</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹80</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="dot"></div>
         <div class="info">
           <div class="name">Chocolate &amp; Chocolate</div>
           <div class="desc">Rich chocolate cupcake with chocolate ganache frosting</div>
         </div>
         <div class="action">
-            <div class="price">₹80</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹80</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card star">
+      <div class="card star reveal">
         <div class="dot"></div>
         <div class="info">
           <div class="name">Raspberry Vanilla White Chocolate <span class="badge">✦ bestseller</span></div>
           <div class="desc">Fluffy vanilla cupcake with raspberry filling and white chocolate ganache frosting</div>
         </div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="dot"></div>
         <div class="info">
           <div class="name">Lemon &amp; Blueberry</div>
           <div class="desc">Lemon cupcake with blueberry filling and lemon ganache</div>
         </div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reveal">
         <div class="dot"></div>
         <div class="info">
           <div class="name">Strawberry Vanilla White Chocolate</div>
           <div class="desc">Vanilla cupcake with strawberry filling and white chocolate ganache frosting</div>
         </div>
         <div class="action">
-            <div class="price">₹95</div>
-
-            <button class="add-btn">
-                Add to Cart
-            </button>
+          <div class="price">₹95</div>
+          <button class="add-btn">Add to Cart</button>
         </div>
       </div>
 
@@ -367,60 +426,20 @@
   </div>
 
   <!-- ORDER INFO -->
-  <div class="order-box">
+  <div class="order-box reveal">
     <h3>How to Order</h3>
     <p>
       Everything is baked fresh, just for you.<br>
-      Please allow <strong>1–2 days</strong> for all orders &amp; delivery.<br>
+      Delivery timeline confirmed at order.<br>
       Slide into our DMs or drop us a WhatsApp to place your order!<br>
       📍 <strong>Chennai only</strong> · Delivery charges may apply
     </p>
     <div class="pills">
       <span class="pill">📱 +91 78455 09979</span>
-      <span class="pill">📸 @thecupcakeatelier</span>
+      <a href="https://instagram.com/thecupcakeatelier" target="_blank" class="pill pill-link">📸 @thecupcakeatelier</a>
     </div>
   </div>
-<div class="cart-section">
 
-   <h2>Your Cart 🛒</h2>
-
-   <div id="cart-items"></div>
-
-   <div class="cart-total">
-      Total: ₹<span id="total">0</span>
-   </div>
-
-</div>
-
-
-<div class="checkout-form">
-
-   <h2>Checkout</h2>
-
-   <input
-   type="text"
-   id="name"
-   placeholder="Your Name">
-
-   <input
-   type="text"
-   id="phone"
-   placeholder="Phone Number">
-
-   <textarea
-   id="address"
-   placeholder="Delivery Address"></textarea>
-
-   <input
-   type="text"
-   id="pincode"
-   placeholder="Pincode">
-
-   <button id="place-order">
-      Place Order
-   </button>
-
-</div>
   <!-- FOOTER -->
   <footer>
     <p>Allergen info available on request · Custom orders always welcome</p>
@@ -428,6 +447,7 @@
   </footer>
 
 </div>
+
 <script src="script.js"></script>
 </body>
 </html>
