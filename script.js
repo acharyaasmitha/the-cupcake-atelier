@@ -5,6 +5,22 @@ if ("serviceWorker" in navigator) {
 
 const buttons = document.querySelectorAll(".add-btn");
 let cart = [];
+let sets = []; // { id, category, size, items: [{name, price}] }
+let setIdCounter = 0;
+
+// SET CONFIG
+const SET_CONFIG = {
+  cookies:     { sizes: [3, 6],     emoji: "🍪", label: "Cookies" },
+  cheesecakes: { sizes: [4, 6, 9],  emoji: "🫐", label: "Cheesecakes" },
+  cupcakes:    { sizes: [4, 6, 12], emoji: "🧁", label: "Cupcakes" }
+};
+
+function getCategory(card) {
+  if (card.closest(".cookie-grid"))  return "cookies";
+  if (card.closest(".cheese-grid"))  return "cheesecakes";
+  if (card.closest(".list"))         return "cupcakes";
+  return null;
+}
 
 // RESTORE SAVED DETAILS
 window.addEventListener("load", () => {
@@ -30,37 +46,151 @@ window.addEventListener("load", () => {
   });
 });
 
-// ADD TO CART
+// ── SET SIZE PICKER ──────────────────────────────────────
+let pendingItem = null;
+
+function openSetPicker(name, price, category) {
+  pendingItem = { name, price, category };
+  const config = SET_CONFIG[category];
+
+  const title   = document.getElementById("set-picker-title");
+  const options = document.getElementById("set-options");
+  title.innerText = `Choose a set size for ${config.emoji} ${config.label}`;
+  options.innerHTML = "";
+
+  // SHOW INCOMPLETE SETS FIRST (to fill existing sets)
+  const incompleteSets = sets.filter(s => s.category === category && s.items.length < s.size);
+
+  if (incompleteSets.length > 0) {
+    const addToLabel = document.createElement("div");
+    addToLabel.className = "set-picker-sublabel";
+    addToLabel.innerText = "Add to an existing set:";
+    options.appendChild(addToLabel);
+
+    incompleteSets.forEach(s => {
+      const btn = document.createElement("button");
+      btn.className = "set-option-btn";
+      const remaining = s.size - s.items.length;
+      btn.innerHTML = `
+        <span class="set-label">Set of ${s.size} (${s.items.length}/${s.size} filled)</span>
+        <span class="set-slots">${remaining} slot${remaining > 1 ? "s" : ""} left</span>
+      `;
+      btn.addEventListener("click", () => {
+        addItemToSet(s.id, name, price);
+        closeSetPicker();
+        flashPendingButton();
+        bounceCartBtn();
+      });
+      options.appendChild(btn);
+    });
+
+    const orLabel = document.createElement("div");
+    orLabel.className = "set-picker-sublabel";
+    orLabel.innerText = "Or start a new set:";
+    options.appendChild(orLabel);
+  }
+
+  config.sizes.forEach(size => {
+    const btn = document.createElement("button");
+    btn.className = "set-option-btn";
+    btn.innerHTML = `
+      <span class="set-label">Set of ${size}</span>
+      <span class="set-slots">New set</span>
+    `;
+    btn.addEventListener("click", () => {
+      createNewSet(category, size, name, price);
+      closeSetPicker();
+      flashPendingButton();
+      bounceCartBtn();
+    });
+    options.appendChild(btn);
+  });
+
+  document.getElementById("set-picker").classList.add("open");
+  document.getElementById("set-overlay").classList.add("show");
+}
+
+function closeSetPicker() {
+  document.getElementById("set-picker").classList.remove("open");
+  document.getElementById("set-overlay").classList.remove("show");
+  pendingItem = null;
+}
+
+function createNewSet(category, size, name, price) {
+  const id = ++setIdCounter;
+  sets.push({ id, category, size, items: [{ name, price }] });
+  updateCart();
+}
+
+function addItemToSet(setId, name, price) {
+  const s = sets.find(s => s.id === setId);
+  if (s && s.items.length < s.size) {
+    s.items.push({ name, price });
+    updateCart();
+  }
+}
+
+function removeItemFromSet(setId, itemIndex) {
+  const s = sets.find(s => s.id === setId);
+  if (!s) return;
+  s.items.splice(itemIndex, 1);
+  if (s.items.length === 0) {
+    sets = sets.filter(s => s.id !== setId);
+  }
+  updateCart();
+}
+
+function removeSet(setId) {
+  sets = sets.filter(s => s.id !== setId);
+  updateCart();
+}
+
+// ── ADD TO CART (feature items — no set) ─────────────────
 buttons.forEach(button => {
   button.addEventListener("click", () => {
-    const card = button.closest(".card, .feature");
+    const card     = button.closest(".card, .feature");
+    const category = getCategory(card);
 
     let name = card.querySelector(".name")
       ? card.querySelector(".name").innerText
       : card.querySelector(".feature-title").innerText;
-
     name = name.replace(/✦.*$/i, "").trim();
 
     let priceText = card.querySelector(".price")
       ? card.querySelector(".price").innerText
       : card.querySelector(".feature-price").innerText;
-
     const price = parseInt(priceText.replace("₹", ""));
-    const existing = cart.find(i => i.name === name);
 
-    if (existing) {
-      existing.quantity++;
+    if (category) {
+      // Store button ref for flash after picker closes
+      button._pendingFlash = true;
+      pendingButton = button;
+      openSetPicker(name, price, category);
     } else {
-      cart.push({ name, price, quantity: 1 });
+      // Feature items — direct add
+      const existing = cart.find(i => i.name === name);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        cart.push({ name, price, quantity: 1 });
+      }
+      updateCart();
+      flashButton(button);
+      bounceCartBtn();
     }
-
-    updateCart();
-    flashButton(button);
-    bounceCartBtn();
   });
 });
 
-// BUTTON FEEDBACK
+let pendingButton = null;
+
+function flashPendingButton() {
+  if (pendingButton) {
+    flashButton(pendingButton);
+    pendingButton = null;
+  }
+}
+
+// ── BUTTON FEEDBACK ──────────────────────────────────────
 function flashButton(button) {
   button.innerText = "Added ✓";
   button.style.background = "#4caf50";
@@ -70,7 +200,6 @@ function flashButton(button) {
   }, 1200);
 }
 
-// BOUNCE CART BUTTON
 function bounceCartBtn() {
   const btn = document.getElementById("floating-cart-btn");
   btn.classList.remove("bounce");
@@ -78,7 +207,7 @@ function bounceCartBtn() {
   btn.classList.add("bounce");
 }
 
-// STICKY HEADER + BACK TO TOP ON SCROLL
+// ── SCROLL / STICKY ──────────────────────────────────────
 window.addEventListener("scroll", () => {
   const sticky      = document.getElementById("sticky-header");
   const floatingBtn = document.getElementById("floating-cart-btn");
@@ -95,13 +224,12 @@ window.addEventListener("scroll", () => {
   }
 });
 
-// SYNC BOTH CART COUNTS
 function updateCartCounts(count) {
   document.getElementById("cart-count").innerText        = count;
   document.getElementById("cart-count-sticky").innerText = count;
 }
 
-// OPEN / CLOSE DRAWER
+// ── OPEN / CLOSE DRAWER ──────────────────────────────────
 function openCart() {
   document.getElementById("cart-drawer").classList.add("open");
   document.getElementById("cart-overlay").classList.add("show");
@@ -117,36 +245,67 @@ function closeCart() {
 
 function scrollToCart() { openCart(); }
 
-// STEP SWITCHING
 function showStep(step) {
   ["cart", "summary", "checkout", "thankyou"].forEach(s => {
     document.getElementById(`step-${s}`).classList.toggle("hidden", s !== step);
   });
 }
 
-// CART → SUMMARY
+// ── CART → SUMMARY ───────────────────────────────────────
 document.getElementById("go-summary").addEventListener("click", () => {
-  if (cart.length === 0) { alert("Your cart is empty!"); return; }
+  const totalItems = sets.reduce((n, s) => n + s.items.length, 0) + cart.reduce((n, i) => n + i.quantity, 0);
+  if (totalItems === 0) { alert("Your cart is empty!"); return; }
+
+  // CHECK INCOMPLETE SETS
+  const incomplete = sets.filter(s => s.items.length < s.size);
+  if (incomplete.length > 0) {
+    const msgs = incomplete.map(s => {
+      const config = SET_CONFIG[s.category];
+      const remaining = s.size - s.items.length;
+      return `${config.emoji} ${config.label} Set of ${s.size} needs ${remaining} more item${remaining > 1 ? "s" : ""}`;
+    });
+    alert("Please complete your sets before checking out:\n\n" + msgs.join("\n"));
+    return;
+  }
+
   buildSummary();
   showStep("summary");
 });
 
-// SUMMARY → CHECKOUT
 document.getElementById("go-checkout").addEventListener("click", () => {
   document.getElementById("total2").innerText = document.getElementById("total").innerText;
   showStep("checkout");
 });
 
-// BACK BUTTONS
 document.getElementById("back-to-cart").addEventListener("click", () => showStep("cart"));
 document.getElementById("go-back").addEventListener("click",      () => showStep("summary"));
 
-// BUILD SUMMARY
+// ── BUILD SUMMARY ────────────────────────────────────────
 function buildSummary() {
   const container = document.getElementById("summary-items");
   container.innerHTML = "";
   let total = 0;
 
+  // SETS
+  sets.forEach(s => {
+    const config   = SET_CONFIG[s.category];
+    const setTotal = s.items.reduce((n, i) => n + i.price, 0);
+    total += setTotal;
+
+    const div = document.createElement("div");
+    div.classList.add("summary-item");
+    const itemNames = s.items.map(i => i.name).join(", ");
+    div.innerHTML = `
+      <div class="summary-item-info">
+        <div class="summary-item-name">${config.emoji} Set of ${s.size}</div>
+        <div class="summary-item-qty">${itemNames}</div>
+      </div>
+      <div class="summary-item-price">₹${setTotal}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  // FEATURE ITEMS
   cart.forEach(item => {
     total += item.price * item.quantity;
     const div = document.createElement("div");
@@ -164,13 +323,56 @@ function buildSummary() {
   document.getElementById("total-summary").innerText = total;
 }
 
-// UPDATE CART
+// ── UPDATE CART ──────────────────────────────────────────
 function updateCart() {
   const cartItems = document.getElementById("cart-items");
   cartItems.innerHTML = "";
   let total = 0;
   let count = 0;
 
+  // RENDER SETS
+  sets.forEach(s => {
+    const config    = SET_CONFIG[s.category];
+    const setTotal  = s.items.reduce((n, i) => n + i.price, 0);
+    const filled    = s.items.length;
+    const remaining = s.size - filled;
+    const complete  = filled === s.size;
+    total += setTotal;
+    count += filled;
+
+    const div = document.createElement("div");
+    div.classList.add("cart-set");
+    if (!complete) div.classList.add("incomplete");
+
+    let itemsHTML = s.items.map((item, idx) => `
+      <div class="set-item-row">
+        <span class="set-item-name">${item.name}</span>
+        <span class="set-item-price">₹${item.price}</span>
+        <button class="set-item-remove" onclick="removeItemFromSet(${s.id}, ${idx})">✕</button>
+      </div>
+    `).join("");
+
+    // EMPTY SLOTS
+    for (let i = 0; i < remaining; i++) {
+      itemsHTML += `<div class="set-slot-empty">+ Add a flavour</div>`;
+    }
+
+    div.innerHTML = `
+      <div class="cart-set-header">
+        <div class="cart-set-title">
+          ${config.emoji} ${config.label} — Set of ${s.size}
+          <span class="set-progress ${complete ? "done" : ""}">${filled}/${s.size}</span>
+        </div>
+        <button class="remove-btn" onclick="removeSet(${s.id})">🗑</button>
+      </div>
+      ${!complete ? `<div class="set-nudge">Add ${remaining} more ${config.label.toLowerCase()} to complete this set</div>` : ""}
+      <div class="set-items-list">${itemsHTML}</div>
+      <div class="cart-set-total">Set total: ₹${setTotal}</div>
+    `;
+    cartItems.appendChild(div);
+  });
+
+  // RENDER FEATURE ITEMS
   cart.forEach((item, index) => {
     total += item.price * item.quantity;
     count += item.quantity;
@@ -195,7 +397,7 @@ function updateCart() {
     cartItems.appendChild(div);
   });
 
-  if (cart.length === 0) {
+  if (sets.length === 0 && cart.length === 0) {
     cartItems.innerHTML = `
       <div class="cart-empty">
         <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="empty-svg">
@@ -231,7 +433,7 @@ function removeItem(index) {
   updateCart();
 }
 
-// PLACE ORDER
+// ── PLACE ORDER ──────────────────────────────────────────
 document.getElementById("place-order").addEventListener("click", () => {
   const name    = document.getElementById("name").value.trim();
   const phone   = document.getElementById("phone").value.trim();
@@ -243,13 +445,11 @@ document.getElementById("place-order").addEventListener("click", () => {
     alert("Please fill in all fields."); return;
   }
 
-  // PHONE VALIDATION
   const phoneClean = phone.replace(/\s+/g, "");
   if (!/^\+?[0-9]{10,13}$/.test(phoneClean)) {
     alert("Please enter a valid phone number."); return;
   }
 
-  // PINCODE VALIDATION
   if (!/^[0-9]{6}$/.test(pincode)) {
     alert("Please enter a valid 6-digit pincode."); return;
   }
@@ -257,10 +457,18 @@ document.getElementById("place-order").addEventListener("click", () => {
     alert("Sorry, delivery is available only in Chennai."); return;
   }
 
-  // SAVE CUSTOMER DETAILS
   localStorage.setItem("ca_customer", JSON.stringify({ name, phone }));
 
   let itemsText = "";
+
+  sets.forEach(s => {
+    const config   = SET_CONFIG[s.category];
+    const setTotal = s.items.reduce((n, i) => n + i.price, 0);
+    itemsText += `${config.emoji} ${config.label} Set of ${s.size}:\n`;
+    s.items.forEach(i => { itemsText += `  • ${i.name} — ₹${i.price}\n`; });
+    itemsText += `  Subtotal: ₹${setTotal}\n\n`;
+  });
+
   cart.forEach(item => {
     itemsText += `${item.name} x${item.quantity} — ₹${item.price * item.quantity}\n`;
   });
@@ -279,15 +487,15 @@ Total: ₹${document.getElementById("total").innerText}${note ? `\n\nNote: ${not
 
   window.open(`https://wa.me/917845509979?text=${encodeURIComponent(message)}`);
 
-  // CLEAR CART & SESSION
+  // CLEAR
   cart = [];
+  sets = [];
   updateCart();
   sessionStorage.removeItem("ca_form");
   ["address", "pincode", "order-note"].forEach(id => {
     document.getElementById(id).value = "";
   });
 
-  // RESTORE SAVED NAME & PHONE
   const saved = JSON.parse(localStorage.getItem("ca_customer") || "{}");
   if (saved.name)  document.getElementById("name").value  = saved.name;
   if (saved.phone) document.getElementById("phone").value = saved.phone;
@@ -296,7 +504,7 @@ Total: ₹${document.getElementById("total").innerText}${note ? `\n\nNote: ${not
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-// INTERSECTION OBSERVER — SCROLL REVEAL
+// ── SCROLL REVEAL ────────────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -308,7 +516,7 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 
-// SWIPE TO DISMISS DRAWER
+// ── SWIPE TO DISMISS ─────────────────────────────────────
 (function() {
   const drawer = document.getElementById("cart-drawer");
   let startX = 0;
@@ -334,7 +542,7 @@ document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
   });
 })();
 
-// PREVENT PULL TO REFRESH
+// ── PREVENT PULL TO REFRESH ──────────────────────────────
 document.body.addEventListener("touchmove", e => {
   if (document.body.style.overflow === "hidden") e.preventDefault();
 }, { passive: false });
