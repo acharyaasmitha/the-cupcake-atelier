@@ -1,6 +1,25 @@
 // SERVICE WORKER
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
+  navigator.serviceWorker.register("/sw.js").then(reg => {
+
+    // DETECT NEW VERSION INSTALLING
+    reg.addEventListener("updatefound", () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "activated") {
+          window.location.reload();
+        }
+      });
+    });
+
+  });
+
+  // RELOAD MESSAGE FROM SERVICE WORKER
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data && e.data.type === "RELOAD") {
+      window.location.reload();
+    }
+  });
 }
 
 const buttons = document.querySelectorAll(".add-btn");
