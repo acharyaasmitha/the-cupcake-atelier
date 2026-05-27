@@ -43,7 +43,7 @@
     h1 {
       font-family:'Great Vibes',cursive;
       font-size:clamp(54px,11vw,90px);
-      color:var(--deep-rose); line-height:1; letter-spacing:2px;
+      color:var(--deep-rose); line-height:1; letter-spacing:0px;
       text-shadow:0 2px 26px rgba(192,90,114,.14);
       opacity:0; animation:up .85s ease .17s forwards;
       margin-top:12px;
