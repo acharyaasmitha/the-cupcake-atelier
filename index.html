@@ -10,10 +10,14 @@
 
   gtag('config', 'G-TP3CWEX2JL');
 </script>
-
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Cupcake Atelier – Menu</title>
+
+  <!-- GOOGLE FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 
   <!-- OG META TAGS -->
   <meta property="og:title"       content="The Cupcake Atelier – Handcrafted Home Bakery"/>
@@ -132,25 +136,27 @@
     </div>
   </div>
 
-  <!-- STEP 4: THANK YOU -->
-  <div class="drawer-step hidden" id="step-thankyou">
-    <div class="drawer-header">
-      <h2>Order Placed!</h2>
-      <button class="drawer-close" onclick="closeCart()">✕</button>
-    </div>
-    <div class="drawer-body thankyou-body">
-      <div class="thankyou-emoji">🎉</div>
-      <div class="thankyou-title">Thank you!</div>
-      <div class="thankyou-msg">
-        Your order has been sent to us on WhatsApp.<br>
-        We'll confirm your order and delivery timeline shortly. 🍰
-      </div>
-      <button class="drawer-cta" onclick="closeCart()">Back to Menu</button>
-    </div>
+<!-- STEP 4: THANK YOU -->
+<div class="drawer-step hidden" id="step-thankyou">
+  <div class="drawer-header">
+    <h2>Order Placed!</h2>
+    <button class="drawer-close" onclick="closeCart()">✕</button>
   </div>
-
+  <div class="drawer-body thankyou-body">
+    <div class="thankyou-emoji">🎉</div>
+    <div class="thankyou-title">Thank you!</div>
+    <div class="thankyou-msg">
+      Your order has been sent to us on WhatsApp.<br>
+      We'll confirm your order and delivery timeline shortly. 🍰
+    </div>
+    <div class="thankyou-recap" id="thankyou-recap"></div>
+    <a id="whatsapp-fallback" href="#" target="_blank" class="fallback-link">
+      WhatsApp didn't open? Tap here to resend 💬
+    </a>
+    <button class="drawer-cta" onclick="closeCart()" style="margin-top: 8px;">Back to Menu</button>
+  </div>
 </div>
-
+</div>
 <div class="page">
 
   <!-- HEADER -->
