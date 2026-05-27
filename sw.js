@@ -35,3 +35,10 @@ self.addEventListener("fetch", e => {
       .catch(() => caches.match(e.request))
   );
 });
+
+// NOTIFY ALL OPEN TABS WHEN NEW VERSION ACTIVATES
+self.addEventListener("activate", () => {
+  self.clients.matchAll({ type: "window" }).then(clients => {
+    clients.forEach(client => client.postMessage({ type: "RELOAD" }));
+  });
+});
