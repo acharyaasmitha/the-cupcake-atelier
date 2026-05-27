@@ -1,8 +1,6 @@
 // SERVICE WORKER
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js").then(reg => {
-
-    // DETECT NEW VERSION INSTALLING
     reg.addEventListener("updatefound", () => {
       const newWorker = reg.installing;
       newWorker.addEventListener("statechange", () => {
@@ -11,10 +9,7 @@ if ("serviceWorker" in navigator) {
         }
       });
     });
-
   });
-
-  // RELOAD MESSAGE FROM SERVICE WORKER
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "RELOAD") {
       window.location.reload();
@@ -24,10 +19,9 @@ if ("serviceWorker" in navigator) {
 
 const buttons = document.querySelectorAll(".add-btn");
 let cart = [];
-let sets = []; // { id, category, size, items: [{name, price}] }
+let sets = [];
 let setIdCounter = 0;
 
-// SET CONFIG
 const SET_CONFIG = {
   cookies:     { sizes: [3, 6],     emoji: "🍪", label: "Cookies" },
   cheesecakes: { sizes: [4, 6, 9],  emoji: "🫐", label: "Cheesecakes" },
@@ -41,19 +35,42 @@ function getCategory(card) {
   return null;
 }
 
-// RESTORE SAVED DETAILS
+// ── PERSIST CART + SETS TO SESSIONSTORAGE ────────────────
+function saveCartToSession() {
+  sessionStorage.setItem("ca_cart", JSON.stringify(cart));
+  sessionStorage.setItem("ca_sets", JSON.stringify(sets));
+  sessionStorage.setItem("ca_setIdCounter", String(setIdCounter));
+}
+
+function loadCartFromSession() {
+  try {
+    const savedCart    = sessionStorage.getItem("ca_cart");
+    const savedSets    = sessionStorage.getItem("ca_sets");
+    const savedCounter = sessionStorage.getItem("ca_setIdCounter");
+    if (savedCart)    cart          = JSON.parse(savedCart);
+    if (savedSets)    sets          = JSON.parse(savedSets);
+    if (savedCounter) setIdCounter  = parseInt(savedCounter);
+    if (cart.length > 0 || sets.length > 0) updateCart();
+  } catch(e) {
+    cart = []; sets = [];
+  }
+}
+
+// ── RESTORE SAVED DETAILS ────────────────────────────────
 window.addEventListener("load", () => {
   const saved = JSON.parse(localStorage.getItem("ca_customer") || "{}");
   if (saved.name)  document.getElementById("name").value  = saved.name;
   if (saved.phone) document.getElementById("phone").value = saved.phone;
 
   const session = JSON.parse(sessionStorage.getItem("ca_form") || "{}");
-  if (session.address) document.getElementById("address").value = session.address;
-  if (session.pincode) document.getElementById("pincode").value = session.pincode;
+  if (session.address) document.getElementById("address").value   = session.address;
+  if (session.pincode) document.getElementById("pincode").value   = session.pincode;
   if (session.note)    document.getElementById("order-note").value = session.note;
+
+  loadCartFromSession();
 });
 
-// PERSIST FORM TO SESSIONSTORAGE ON INPUT
+// PERSIST FORM ON INPUT
 ["address", "pincode", "order-note"].forEach(id => {
   document.getElementById(id).addEventListener("input", () => {
     const session = {
@@ -66,18 +83,15 @@ window.addEventListener("load", () => {
 });
 
 // ── SET SIZE PICKER ──────────────────────────────────────
-let pendingItem = null;
+let pendingButton = null;
 
 function openSetPicker(name, price, category) {
-  pendingItem = { name, price, category };
-  const config = SET_CONFIG[category];
-
+  const config  = SET_CONFIG[category];
   const title   = document.getElementById("set-picker-title");
   const options = document.getElementById("set-options");
   title.innerText = `Choose a set size for ${config.emoji} ${config.label}`;
   options.innerHTML = "";
 
-  // SHOW INCOMPLETE SETS FIRST (to fill existing sets)
   const incompleteSets = sets.filter(s => s.category === category && s.items.length < s.size);
 
   if (incompleteSets.length > 0) {
@@ -87,12 +101,16 @@ function openSetPicker(name, price, category) {
     options.appendChild(addToLabel);
 
     incompleteSets.forEach(s => {
-      const btn = document.createElement("button");
-      btn.className = "set-option-btn";
+      const btn       = document.createElement("button");
+      btn.className   = "set-option-btn";
       const remaining = s.size - s.items.length;
-      btn.innerHTML = `
-        <span class="set-label">Set of ${s.size} (${s.items.length}/${s.size} filled)</span>
-        <span class="set-slots">${remaining} slot${remaining > 1 ? "s" : ""} left</span>
+      const preview   = s.items.map(i => i.name).join(", ");
+      btn.innerHTML   = `
+        <div style="text-align:left;">
+          <div class="set-label">Set of ${s.size} (${s.items.length}/${s.size} filled)</div>
+          <div class="set-preview">${preview}</div>
+        </div>
+        <span class="set-slots">${remaining} left</span>
       `;
       btn.addEventListener("click", () => {
         addItemToSet(s.id, name, price);
@@ -103,16 +121,16 @@ function openSetPicker(name, price, category) {
       options.appendChild(btn);
     });
 
-    const orLabel = document.createElement("div");
-    orLabel.className = "set-picker-sublabel";
-    orLabel.innerText = "Or start a new set:";
+    const orLabel       = document.createElement("div");
+    orLabel.className   = "set-picker-sublabel";
+    orLabel.innerText   = "Or start a new set:";
     options.appendChild(orLabel);
   }
 
   config.sizes.forEach(size => {
-    const btn = document.createElement("button");
-    btn.className = "set-option-btn";
-    btn.innerHTML = `
+    const btn       = document.createElement("button");
+    btn.className   = "set-option-btn";
+    btn.innerHTML   = `
       <span class="set-label">Set of ${size}</span>
       <span class="set-slots">New set</span>
     `;
@@ -132,13 +150,13 @@ function openSetPicker(name, price, category) {
 function closeSetPicker() {
   document.getElementById("set-picker").classList.remove("open");
   document.getElementById("set-overlay").classList.remove("show");
-  pendingItem = null;
 }
 
 function createNewSet(category, size, name, price) {
   const id = ++setIdCounter;
   sets.push({ id, category, size, items: [{ name, price }] });
   updateCart();
+  saveCartToSession();
 }
 
 function addItemToSet(setId, name, price) {
@@ -146,6 +164,7 @@ function addItemToSet(setId, name, price) {
   if (s && s.items.length < s.size) {
     s.items.push({ name, price });
     updateCart();
+    saveCartToSession();
   }
 }
 
@@ -153,18 +172,18 @@ function removeItemFromSet(setId, itemIndex) {
   const s = sets.find(s => s.id === setId);
   if (!s) return;
   s.items.splice(itemIndex, 1);
-  if (s.items.length === 0) {
-    sets = sets.filter(s => s.id !== setId);
-  }
+  if (s.items.length === 0) sets = sets.filter(s => s.id !== setId);
   updateCart();
+  saveCartToSession();
 }
 
 function removeSet(setId) {
   sets = sets.filter(s => s.id !== setId);
   updateCart();
+  saveCartToSession();
 }
 
-// ── ADD TO CART (feature items — no set) ─────────────────
+// ── ADD TO CART ──────────────────────────────────────────
 buttons.forEach(button => {
   button.addEventListener("click", () => {
     const card     = button.closest(".card, .feature");
@@ -181,12 +200,9 @@ buttons.forEach(button => {
     const price = parseInt(priceText.replace("₹", ""));
 
     if (category) {
-      // Store button ref for flash after picker closes
-      button._pendingFlash = true;
       pendingButton = button;
       openSetPicker(name, price, category);
     } else {
-      // Feature items — direct add
       const existing = cart.find(i => i.name === name);
       if (existing) {
         existing.quantity++;
@@ -194,22 +210,17 @@ buttons.forEach(button => {
         cart.push({ name, price, quantity: 1 });
       }
       updateCart();
+      saveCartToSession();
       flashButton(button);
       bounceCartBtn();
     }
   });
 });
 
-let pendingButton = null;
-
 function flashPendingButton() {
-  if (pendingButton) {
-    flashButton(pendingButton);
-    pendingButton = null;
-  }
+  if (pendingButton) { flashButton(pendingButton); pendingButton = null; }
 }
 
-// ── BUTTON FEEDBACK ──────────────────────────────────────
 function flashButton(button) {
   button.innerText = "Added ✓";
   button.style.background = "#4caf50";
@@ -272,14 +283,14 @@ function showStep(step) {
 
 // ── CART → SUMMARY ───────────────────────────────────────
 document.getElementById("go-summary").addEventListener("click", () => {
-  const totalItems = sets.reduce((n, s) => n + s.items.length, 0) + cart.reduce((n, i) => n + i.quantity, 0);
+  const totalItems = sets.reduce((n, s) => n + s.items.length, 0) +
+                     cart.reduce((n, i) => n + i.quantity, 0);
   if (totalItems === 0) { alert("Your cart is empty!"); return; }
 
-  // CHECK INCOMPLETE SETS
   const incomplete = sets.filter(s => s.items.length < s.size);
   if (incomplete.length > 0) {
     const msgs = incomplete.map(s => {
-      const config = SET_CONFIG[s.category];
+      const config    = SET_CONFIG[s.category];
       const remaining = s.size - s.items.length;
       return `${config.emoji} ${config.label} Set of ${s.size} needs ${remaining} more item${remaining > 1 ? "s" : ""}`;
     });
@@ -305,29 +316,25 @@ function buildSummary() {
   container.innerHTML = "";
   let total = 0;
 
-  // SETS
   sets.forEach(s => {
     const config   = SET_CONFIG[s.category];
     const setTotal = s.items.reduce((n, i) => n + i.price, 0);
     total += setTotal;
-
-    const div = document.createElement("div");
+    const div      = document.createElement("div");
     div.classList.add("summary-item");
-    const itemNames = s.items.map(i => i.name).join(", ");
-    div.innerHTML = `
+    div.innerHTML  = `
       <div class="summary-item-info">
         <div class="summary-item-name">${config.emoji} Set of ${s.size}</div>
-        <div class="summary-item-qty">${itemNames}</div>
+        <div class="summary-item-qty">${s.items.map(i => i.name).join(", ")}</div>
       </div>
       <div class="summary-item-price">₹${setTotal}</div>
     `;
     container.appendChild(div);
   });
 
-  // FEATURE ITEMS
   cart.forEach(item => {
     total += item.price * item.quantity;
-    const div = document.createElement("div");
+    const div     = document.createElement("div");
     div.classList.add("summary-item");
     div.innerHTML = `
       <div class="summary-item-info">
@@ -349,7 +356,6 @@ function updateCart() {
   let total = 0;
   let count = 0;
 
-  // RENDER SETS
   sets.forEach(s => {
     const config    = SET_CONFIG[s.category];
     const setTotal  = s.items.reduce((n, i) => n + i.price, 0);
@@ -371,7 +377,6 @@ function updateCart() {
       </div>
     `).join("");
 
-    // EMPTY SLOTS
     for (let i = 0; i < remaining; i++) {
       itemsHTML += `<div class="set-slot-empty">+ Add a flavour</div>`;
     }
@@ -391,12 +396,10 @@ function updateCart() {
     cartItems.appendChild(div);
   });
 
-  // RENDER FEATURE ITEMS
   cart.forEach((item, index) => {
     total += item.price * item.quantity;
     count += item.quantity;
-
-    const div = document.createElement("div");
+    const div     = document.createElement("div");
     div.classList.add("cart-item");
     div.innerHTML = `
       <div class="cart-item-info">
@@ -439,17 +442,19 @@ function updateCart() {
   updateCartCounts(count);
 }
 
-function increaseQty(index) { cart[index].quantity++; updateCart(); }
+function increaseQty(index) { cart[index].quantity++; updateCart(); saveCartToSession(); }
 
 function decreaseQty(index) {
   cart[index].quantity--;
   if (cart[index].quantity <= 0) cart.splice(index, 1);
   updateCart();
+  saveCartToSession();
 }
 
 function removeItem(index) {
   cart.splice(index, 1);
   updateCart();
+  saveCartToSession();
 }
 
 // ── PLACE ORDER ──────────────────────────────────────────
@@ -460,15 +465,20 @@ document.getElementById("place-order").addEventListener("click", () => {
   const pincode = document.getElementById("pincode").value.trim();
   const note    = document.getElementById("order-note").value.trim();
 
-  if (!name || !phone || !address || !pincode) {
+  // VALIDATION
+  if (!name || name.length < 2) {
+    alert("Please enter your name."); return;
+  }
+  if (!phone || !address || !pincode) {
     alert("Please fill in all fields."); return;
   }
-
+  if (address.length < 10) {
+    alert("Please enter a complete delivery address."); return;
+  }
   const phoneClean = phone.replace(/\s+/g, "");
   if (!/^\+?[0-9]{10,13}$/.test(phoneClean)) {
     alert("Please enter a valid phone number."); return;
   }
-
   if (!/^[0-9]{6}$/.test(pincode)) {
     alert("Please enter a valid 6-digit pincode."); return;
   }
@@ -476,10 +486,14 @@ document.getElementById("place-order").addEventListener("click", () => {
     alert("Sorry, delivery is available only in Chennai."); return;
   }
 
+  // LOADING STATE
+  const placeBtn      = document.getElementById("place-order");
+  placeBtn.innerText  = "Sending... 💬";
+  placeBtn.disabled   = true;
+
   localStorage.setItem("ca_customer", JSON.stringify({ name, phone }));
 
   let itemsText = "";
-
   sets.forEach(s => {
     const config   = SET_CONFIG[s.category];
     const setTotal = s.items.reduce((n, i) => n + i.price, 0);
@@ -487,10 +501,11 @@ document.getElementById("place-order").addEventListener("click", () => {
     s.items.forEach(i => { itemsText += `  • ${i.name} — ₹${i.price}\n`; });
     itemsText += `  Subtotal: ₹${setTotal}\n\n`;
   });
-
   cart.forEach(item => {
     itemsText += `${item.name} x${item.quantity} — ₹${item.price * item.quantity}\n`;
   });
+
+  const totalAmt = document.getElementById("total").innerText;
 
   const message =
 `NEW ORDER 🍰
@@ -502,26 +517,69 @@ Pincode: ${pincode}
 
 Items:
 ${itemsText}
-Total: ₹${document.getElementById("total").innerText}${note ? `\n\nNote: ${note}` : ""}`;
+Total: ₹${totalAmt}${note ? `\n\nNote: ${note}` : ""}`;
 
-  window.open(`https://wa.me/917845509979?text=${encodeURIComponent(message)}`);
+  const waUrl = `https://wa.me/917845509979?text=${encodeURIComponent(message)}`;
 
-  // CLEAR
-  cart = [];
-  sets = [];
-  updateCart();
-  sessionStorage.removeItem("ca_form");
-  ["address", "pincode", "order-note"].forEach(id => {
-    document.getElementById(id).value = "";
+  // BUILD THANK YOU RECAP
+  buildThankyouRecap(name, totalAmt);
+
+  // SET FALLBACK LINK
+  document.getElementById("whatsapp-fallback").href = waUrl;
+
+  setTimeout(() => {
+    window.open(waUrl);
+
+    // RESET BUTTON
+    placeBtn.innerText = "Place Order via WhatsApp 💬";
+    placeBtn.disabled  = false;
+
+    // CLEAR CART & SESSION
+    cart = []; sets = [];
+    updateCart();
+    saveCartToSession();
+    sessionStorage.removeItem("ca_form");
+    ["address", "pincode", "order-note"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+
+    const saved = JSON.parse(localStorage.getItem("ca_customer") || "{}");
+    if (saved.name)  document.getElementById("name").value  = saved.name;
+    if (saved.phone) document.getElementById("phone").value = saved.phone;
+
+    showStep("thankyou");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, 600);
+});
+
+// ── THANK YOU RECAP ──────────────────────────────────────
+function buildThankyouRecap(name, total) {
+  const recap = document.getElementById("thankyou-recap");
+  let html    = `<div class="recap-name">Order for ${name}</div>`;
+
+  sets.forEach(s => {
+    const config   = SET_CONFIG[s.category];
+    const setTotal = s.items.reduce((n, i) => n + i.price, 0);
+    html += `
+      <div class="recap-item">
+        <span>${config.emoji} ${config.label} Set of ${s.size}</span>
+        <span>₹${setTotal}</span>
+      </div>
+    `;
   });
 
-  const saved = JSON.parse(localStorage.getItem("ca_customer") || "{}");
-  if (saved.name)  document.getElementById("name").value  = saved.name;
-  if (saved.phone) document.getElementById("phone").value = saved.phone;
+  cart.forEach(item => {
+    html += `
+      <div class="recap-item">
+        <span>${item.name} × ${item.quantity}</span>
+        <span>₹${item.price * item.quantity}</span>
+      </div>
+    `;
+  });
 
-  showStep("thankyou");
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
+  html += `<div class="recap-total"><span>Total</span><span>₹${total}</span></div>`;
+  recap.innerHTML = html;
+}
 
 // ── SCROLL REVEAL ────────────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
