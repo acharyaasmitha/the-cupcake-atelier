@@ -28,22 +28,22 @@
   <meta name="twitter:card"       content="summary_large_image"/>
 
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧁</text></svg>">
 </head>
 <body>
 
 <!-- STICKY HEADER -->
 <div class="sticky-header" id="sticky-header">
   <span class="sticky-logo">The Cupcake Atelier</span>
-  <button class="floating-cart sticky-cart-btn" onclick="openCart()">
+  <button class="sticky-cart-btn" onclick="openCart()">
     🛒 Cart
     <span id="cart-count-sticky">0</span>
   </button>
 </div>
 
-<!-- FLOATING CART -->
-<button class="floating-cart" id="floating-cart-btn" onclick="openCart()">
-  🛒 Cart
-  <span id="cart-count">0</span>
+<!-- FLOATING CART PILL -->
+<button class="cart-pill" id="floating-cart-btn" onclick="openCart()">
+  🛒 <span id="cart-count">0</span>
 </button>
 
 <!-- BACK TO TOP -->
@@ -174,15 +174,11 @@
     </div>
   </header>
 
-  <!-- HERO BANNER -->
-  <div class="hero-banner">
-    <div class="hero-text">
-      <span>Fresh.</span>
-      <span>Handcrafted.</span>
-      <span>Made for you.</span>
-    </div>
-    <div class="hero-icons">🍪 🧁 🫐 ☕ 🍫</div>
-  </div>
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="hero-tagline">Welcome!</div>
+  <div class="hero-sub">Everything here is baked fresh, just for you 🍰</div>
+</div>
 
   <!-- COOKIES -->
   <div class="sec reveal" id="sec-cookies">
@@ -451,7 +447,7 @@
       📍 <strong>Chennai only</strong> · Delivery charges may apply
     </p>
     <div class="pills">
-      <span class="pill">📱 +91 78455 09979</span>
+      <a href="https://wa.me/917845509979" target="_blank" class="pill pill-link">📱 +91 78455 09979</a>
       <a href="https://instagram.com/thecupcakeatelier" target="_blank" class="pill pill-link">📸 @thecupcakeatelier</a>
     </div>
   </div>
