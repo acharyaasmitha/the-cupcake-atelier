@@ -623,3 +623,5 @@ document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 document.body.addEventListener("touchmove", e => {
   if (document.body.style.overflow === "hidden") e.preventDefault();
 }, { passive: false });
+// SHOW EMPTY STATE ON INITIAL LOAD
+updateCart();
